@@ -1,20 +1,11 @@
 /*
 File: main.cpp
-This example for the Arduino Uno WiFi shows how to access the digital and analog pins
-of the board through REST calls. It demonstrates how you can create your own API using
-REST style.
-
-Possible commands created in this sketch:
-
-	"/arduino/digital/13"     -> digitalRead(13)
-	"/arduino/digital/13/1"   -> digitalWrite(13, HIGH)
-	"/arduino/analog/2/123"   -> analogWrite(2, 123)
-	"/arduino/analog/2"       -> analogRead(2)
-	"/arduino/mode/13/input"  -> pinMode(13, INPUT)
-	"/arduino/mode/13/output" -> pinMode(13, OUTPUT)
-
-
+This example for the ESP32 WiFi is inspired from the Arduino example at:
 http://www.arduino.org/learning/tutorials/boards-tutorials/restserver-and-restclient
+Which demonstrates how you can create your own API using REST style.
+
+Web API:
+  see README.md
 */
 
 //#define DEBUG_REQUEST
@@ -23,6 +14,7 @@ http://www.arduino.org/learning/tutorials/boards-tutorials/restserver-and-restcl
 #include <Arduino.h>
 #include <WiFi.h>
 #include "Request.h"
+// must define char *ssid and char *pass)
 #include "credentials.h"
 #include "tabs.h"
 
@@ -33,20 +25,12 @@ WiFiServer server(80);
 
 void process(WiFiClient client);
 void processApi(WiFiClient client, request::PinRequest req);
-
-void modeCommand(WiFiClient client);
-void digitalCommand(WiFiClient client);
-void analogCommand(WiFiClient client);
-
 void ok(WiFiClient client);
-void err(WiFiClient client, const char *msg);
-
 void showPin(WiFiClient client, int pin, String mode, String signal, int digital, int analog);
 void showWebPage(WiFiClient client);
 
 void setup()
 {
-
   // Start Serial
   Serial.begin(9600);
 
@@ -64,7 +48,7 @@ void setup()
   server.begin();
   Serial.println("Server started");
 
-  // Print the IP address
+  // Indicate the IP address
   Serial.println(WiFi.localIP());
 }
 
@@ -117,18 +101,6 @@ void process(WiFiClient client)
 
 void processApi(WiFiClient client, request::PinRequest req)
 {
-
-  Serial.print("Request mode=");
-  Serial.print(req.mode);
-  Serial.print(" type=");
-  Serial.print(req.signal);
-  Serial.print(" pin=");
-  Serial.print(req.pin);
-  Serial.print(" digital=");
-  Serial.print(req.digital);
-  Serial.print(" analog=");
-  Serial.println(req.analog);
-
   char mode = req.mode.charAt(0);
   char signal = req.signal.charAt(0);
   int digital = req.digital;
@@ -159,57 +131,25 @@ void processApi(WiFiClient client, request::PinRequest req)
   {
     analog = analogRead(pin);
   }
-  char s[64];
-  sprintf(s, "mode=%c, signal=%c, pin=%d, digital=%d, analog=%d\n",
-          mode, signal, pin, digital, analog);
-  Serial.println(s);
-  /*
-  Serial.print("mode=");
-  Serial.print(mode);
-  Serial.print(" signal=");
-  Serial.print(signal);
-  Serial.print(" pin=");
-  Serial.print(pin);
-  Serial.print(" digital=");
-  Serial.print(digital);
-  Serial.print(" analog=");
-  Serial.println(analog);
-*/
   ok(client);
   showPin(client, pin, req.mode, req.signal, digital, analog);
 }
 
-void err(WiFiClient client, const char *msg)
-{
-  ok(client);
-  client.println(msg);
-  client.println("");
-}
- 
 void ok(WiFiClient client)
 {
-  client.println("HTTP/1.1 200 OK\n");
+  // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+  // and a content-type so the client knows what's coming, then a blank line:
+  client.println("HTTP/1.1 200 OK");
+  // indicate JSON per RFC 4627
+  client.println("Content-type:application/json");
+  client.println();
 }
 
 void showPin(WiFiClient client, int pin, String mode, String signal, int digital, int analog)
 {
   char buffer[128];
-  sprintf(buffer, "{\"pin\":%d,\"mode\":\"%s\",\"signal\":\"%s\",\"digital\":%d,\"analog\":%d}",
+  sprintf(buffer, "{\"pin\":%d,\"mode\":\"%s\",\"signal\":\"%s\",\"digital\":%d,\"analog\":%d}\n",
           pin, mode.c_str(), signal.c_str(), digital, analog);
-  Serial.println(buffer); 
   client.println(buffer);
-  /*
-  String s = "{ \"pin\": ";
-  s.concat(pin);
-  s.concat(", \"mode\": \"");
-  s.concat(mode);
-  s.concat("\", \"signal\": \"");
-  s.concat(signal);
-  s.concat("\", \"digital\": ");
-  s.concat(digital);
-  s.concat(", \"analog\": ");
-  s.concat(analog);
-  s.concat("}");
-  client.println(s);
-  */
+  Serial.println(buffer);
 }

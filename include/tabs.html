@@ -1,5 +1,6 @@
 <!DOCsignal html>
     <html>
+
     <head>
         <title>ESP32 Controller</title>
         <meta charset='utf-8'>
@@ -60,12 +61,13 @@
 
                     var actionFile = $('form').attr('action');
                     var formValues = $(this).serialize();
-                    $.get(actionFile, formValues, function (data) {
-                        var resp = JSON.parse(data);
+                    $.get(actionFile, formValues, function (resp) {
                         console.log(resp);
                         $('#analog').val(resp.analog);
                         $('#digital').val(resp.digital);
-                        $('#response').html(data);
+                        var txt = "<td>" + resp.pin + "</td><td>" + resp.mode + "</td><td>" + resp.signal +
+                            "</td><td>" + resp.digital + "</td><td>" + resp.analog + "</td>";
+                        $('#response').html(txt);
                     });
                 });
             });
@@ -93,15 +95,15 @@
                         <div class='form-group col-sm-3' id='modeG'>
                             <label for='mode'>I/O Mode: </label>
                             <select class='form-control' id='mode' name='mode'>
-                                <option value='input'>READ</option>
-                                <option value='output'>WRITE</option>
+                                <option value='input'>INPUT</option>
+                                <option value='output'>OUTPUT</option>
                             </select>
                         </div>
                         <div class='form-group col-sm-3' id='digitalG'>
                             <label for='digital'>Digital Value: </label>
                             <select class='form-control' id='digital' name='digital'>
-                                <option value='1'>HIGH</option>
                                 <option value='0'>LOW</option>
+                                <option value='1'>HIGH</option>
                             </select>
                         </div>
                         <div class='form-group col-sm-3' id='analogG'>
@@ -112,7 +114,17 @@
                     <button type='submit' class='btn btn-primary'><i class='material-icons'>send</i>Send</button>
                 </form>
             </div>
-            <div class='card-footer bg-light' id='response'>response </div>
+        </div>
+        <div class='container card'>
+            <table class='table bg-secondary text-white'>
+                <th>pin</th>
+                <th>mode</th>
+                <th>signal</th>
+                <th>digital</th>
+                <th>analog</th>
+                <tr id='response'></tr>
+            </table>
         </div>
     </body>
+
     </html>
