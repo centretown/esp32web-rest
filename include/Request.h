@@ -21,10 +21,6 @@ namespace request
         String name;
         String value;
     };
-
-    /**
- * Parser - parses http request and provides access to it's elements
- **/
     class Parser
     {
     private:
