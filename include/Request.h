@@ -13,13 +13,12 @@ namespace request
     {
         String name;
         String value;
-    }; // namespace requeststructPair
+    };
 
     class Request
     {
     private:
         const char *content_length = "Content-Length: ";
-        char m[8], p[512], v[16];
 
     public:
         enum
@@ -49,6 +48,7 @@ namespace request
 
         void parse(String &source)
         {
+            char m[8], p[256], v[16];
             sscanf(source.c_str(), "%s %s %s\n", m, p, v);
 #ifdef DEBUG_REQUEST
             Serial.printf("n: %d, m: %s, p: %s, v: %s\n", n, m, p, v);
@@ -96,9 +96,9 @@ namespace request
             else
             {
                 int offset = 0;
-                for (int i = 0; offset >= 0 && i < MAX_COMMANDS; i++)
+                for (size = 0; offset >= 0 && size < MAX_COMMANDS; size++)
                 {
-                    offset = parsePair(offset, i);
+                    offset = parsePair(offset, size);
 #ifdef DEBUG_REQUEST
                     Serial.printf("i=%d, offset=%d, name=%s, value=%s\n",
                                   i, offset, commands[i].name.c_str(), commands[i].value.c_str());
@@ -149,7 +149,7 @@ namespace request
         PinRequest(String source) : Request(source)
         {
             Pair cmd;
-            for (size_t i = 0; i < MAX_COMMANDS; i++)
+            for (size_t i = 0; i < size; i++)
             {
                 cmd = commands[i];
                 if (cmd.name == "pin")
