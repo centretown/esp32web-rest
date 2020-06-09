@@ -74,8 +74,11 @@ void process(WiFiClient client)
 {
   // read the command
 
-  request::PinRequest req = request::PinRequest(client.readString());
-  Serial.println(req.path.c_str());
+  String s = client.readString();
+  //Serial.println(s);
+
+  request::PinRequest req = request::PinRequest(s);
+  //Serial.println(req.path.c_str());
   if (req.path.startsWith("/api/"))
   {
     processApi(client, req);

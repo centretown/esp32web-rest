@@ -1,5 +1,7 @@
 # ESP32 - Pin Controller
 A simple web/rest server and client for the ESP32 micro controller.
+This example for the ESP32 WiFi is inspired from the Arduino example [here](http://www.arduino.org/learning/tutorials/boards-tutorials/restserver-and-restclient).
+Which demonstrates how you can create your own API using REST style.
 # VSCode
 [Installation instructions here.](http://code.visualstudio.com/download)
 # Platformio

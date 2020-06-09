@@ -9,145 +9,19 @@
 
 namespace request
 {
-    struct ParseElement
-    {
-        int begin = -1;
-        int end = -1;
-        char term = ' ';
-    };
-
     struct Pair
     {
         String name;
         String value;
-    };
-    class Parser
-    {
-    private:
-        ParseElement *elements = NULL;
-
-        const char *pre = "";
-        char sep = ' ';
-        char term = '\n';
-        size_t max = 0;
-        size_t size = 0;
-
-    public:
-        Parser(const char *prefix, char separator, char terminator, size_t maximum)
-        {
-            pre = prefix;
-            sep = separator;
-            term = terminator;
-            max = maximum;
-#ifdef DEBUG_REQUEST
-            Serial.print("(prefix: ");
-            Serial.print(pre);
-            Serial.print(", separator: ");
-            Serial.print((int)sep);
-            Serial.print(", terminator:");
-            Serial.print((int)term);
-            Serial.print(", maximum:");
-            Serial.print(maximum);
-            Serial.println(")");
-#endif
-            if (max > 0)
-            {
-                elements = (ParseElement *)malloc(sizeof(ParseElement) * max);
-                for (size_t i = 0; i < max - 1; i++)
-                {
-                    elements[i].term = sep;
-                }
-                elements[max - 1].term = term;
-            }
-        }
-
-        ~Parser()
-        {
-            if (elements != NULL)
-            {
-                free(elements);
-            }
-        }
-
-        String parse(String &source);
-
-        String get(String &src, size_t index)
-        {
-            ParseElement *pEl = NULL;
-            if (index >= max)
-            {
-                return String("index >= maximum");
-            }
-            pEl = &elements[index];
-
-#ifdef DEBUG_REQUEST
-            Serial.print("(begin: ");
-            Serial.print(pEl->begin);
-            Serial.print(", end:");
-            Serial.print(pEl->end);
-            Serial.println(")");
-#endif
-            if (pEl->begin < 0)
-            {
-                return String("begin < zero");
-            }
-            if (pEl->end <= pEl->begin)
-            {
-                return String("end <= begin");
-            }
-            return src.substring(pEl->begin, pEl->end);
-        }
-
-        size_t length()
-        {
-            return size;
-        }
-    };
-
-    class RequestPath
-    {
-    private:
-        enum
-        {
-            MAX = 16
-        };
-
-    public:
-        Pair commands[MAX];
-        size_t size;
-
-        RequestPath(String &source)
-        {
-            Parser parser = Parser("/api/?", '&', '&', MAX);
-            String req = parser.parse(source);
-            size = parser.length();
-#ifdef DEBUG_REQUEST
-            Serial.print("length: ");
-            Serial.println(size);
-#endif
-            Parser pairParser = Parser("", '=', ';', 2);
-            String pairStr;
-            for (size_t i = 0; i < size; i++)
-            {
-                pairStr = parser.get(req, i);
-                pairParser.parse(pairStr);
-                commands[i].name = pairParser.get(pairStr, 0);
-                commands[i].value = pairParser.get(pairStr, 1);
-#ifdef DEBUG_REQUEST
-                Serial.println(commands[i].name.c_str());
-                Serial.println(commands[i].value.c_str());
-                Serial.println(pairStr.c_str());
-#endif
-            }
-        }
-        ~RequestPath()
-        {
-        }
-    };
+    }; // namespace requeststructPair
 
     class Request
     {
     private:
+        const char *content_length = "Content-Length: ";
+        char m[8], p[512], v[16];
+
+    public:
         enum
         {
             METHOD,
@@ -157,26 +31,108 @@ namespace request
             MAX_COMMANDS = 8
         };
 
-        /* data */
-
-    public:
         Pair commands[MAX_COMMANDS];
         String method;
         String path;
         String version;
+        String body;
         size_t size = 0;
 
-        Request(String source)
+        Request(String &source)
         {
-            Parser parser = Parser("", ' ', '\n', MAX);
-            String req = parser.parse(source);
-
-            method = parser.get(req, METHOD);
-            path = parser.get(req, PATH);
-            version = parser.get(req, VERSION);
+            parse(source);
         }
+
         ~Request()
         {
+        }
+
+        void parse(String &source)
+        {
+            sscanf(source.c_str(), "%s %s %s\n", m, p, v);
+#ifdef DEBUG_REQUEST
+            Serial.printf("n: %d, m: %s, p: %s, v: %s\n", n, m, p, v);
+#endif
+            method = m;
+            path = p;
+            version = v;
+            if (method == "GET")
+            { // handle gets in path
+                int begin = path.indexOf("?");
+                if (begin >= 0)
+                {
+                    body = path.substring(begin);
+                }
+            }
+            else if (method == "POST")
+            { // handle posts in content
+                int end = -1;
+                int begin = source.indexOf(content_length);
+                if (begin >= 0)
+                {
+                    end = source.indexOf("\n", begin);
+                    if (end >= 0)
+                    {
+                        int clen = source.substring(begin + strlen(content_length), end).toInt();
+                        int len = source.length();
+                        body = source.substring(len - clen, len);
+#ifdef DEBUG_REQUEST
+                        Serial.print("content-length: ");
+                        Serial.println(clen);
+#endif
+                    }
+                }
+            }
+#ifdef DEBUG_REQUEST
+            Serial.print("body:'");
+            Serial.print(body);
+            Serial.print("';'");
+#endif
+            // scan the body for parameters
+            if (body.charAt(0) == '{')
+            {
+                // todo JSON
+            }
+            else
+            {
+                int offset = 0;
+                for (int i = 0; offset >= 0 && i < MAX_COMMANDS; i++)
+                {
+                    offset = parsePair(offset, i);
+#ifdef DEBUG_REQUEST
+                    Serial.printf("i=%d, offset=%d, name=%s, value=%s\n",
+                                  i, offset, commands[i].name.c_str(), commands[i].value.c_str());
+#endif
+                }
+            }
+        }
+
+        int parsePair(int offset, int cmd)
+        {
+            String buffer;
+            int ampPos = body.indexOf('&', offset);
+            if (ampPos > offset)
+            {
+                buffer = body.substring(offset, ampPos);
+            }
+            else
+            {
+                buffer = body.substring(offset);
+            }
+
+            int eqPos = buffer.indexOf('=');
+            if (eqPos > 0)
+            {
+                commands[cmd].name = buffer.substring(0, eqPos);
+                commands[cmd].value = buffer.substring(eqPos + 1);
+            }
+
+            // skip past & to return next position
+            if (ampPos >= 0)
+            {
+                ampPos++;
+            }
+            return ampPos;
         }
     };
 
@@ -192,16 +148,13 @@ namespace request
 
         PinRequest(String source) : Request(source)
         {
-            RequestPath p = RequestPath(path);
-            size = p.size;
             Pair cmd;
-            for (size_t i = 0; i < size; i++)
+            for (size_t i = 0; i < MAX_COMMANDS; i++)
             {
-                cmd = p.commands[i];
+                cmd = commands[i];
                 if (cmd.name == "pin")
                 {
                     pin = cmd.value.toInt();
-                    ;
                 }
                 else if (cmd.name == "mode")
                 {
@@ -226,87 +179,6 @@ namespace request
         }
     };
 
-    String Parser::parse(String &source)
-    {
-        String req = String("");
-        // first line only
-        int eol = source.indexOf('\n');
-        if (eol < 0)
-        {
-            eol = source.length();
-        }
-#ifdef DEBUG_REQUEST
-        Serial.print("eol: ");
-        Serial.println(eol);
-#endif
-        if (eol > 0)
-        {
-            int index = 0;
-            req = source.substring(0, eol);
-
-            // skip prefix
-            int l = strlen(pre);
-            if (l > 0)
-            {
-                int px = req.indexOf(pre);
-                if (px == 0)
-                {
-                    index += l;
-                }
-            }
-
-            // skip separators
-            while (req.charAt(index) == sep)
-            {
-                index++;
-            }
-#ifdef DEBUG_REQUEST
-            Serial.println(req.c_str());
-#endif
-            int end = req.length();
-            ParseElement *p;
-
-            for (int i = 0; i < max; i++)
-            {
-                p = &elements[i];
-                if (index < 0)
-                {
-                    p->begin = -1;
-                    p->end = -1;
-                }
-                else
-                {
-                    p->begin = index;
-                    p->end = req.indexOf(p->term, index);
-                    if (p->end > 0)
-                    {
-                        index = p->end + 1;
-                    }
-                    else
-                    {
-                        p->end = end;
-                        index = -1;
-                        size = i + 1;
-                    }
-                }
-#ifdef DEBUG_REQUEST
-                Serial.print("i=");
-                Serial.print(i);
-                Serial.print(", index=");
-                Serial.print(index);
-                Serial.print(", end=");
-                Serial.print(p->end);
-                Serial.print(", term=");
-                Serial.println((int)p->term);
-#endif
-            }
-        }
-#ifdef DEBUG_REQUEST
-        Serial.print("length: ");
-        Serial.println(size);
-#endif
-        return req;
-    }
 } // namespace request
 
 #endif // REQUEST_H
