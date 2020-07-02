@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://github.com/centretown/esp32web-rest/blob/master/include/index.css"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://github.com/centretown/esp32web-rest/blob/master/include/index.css" 
+    crossorigin="anonymous">
+    <title>Document</title>
+    </style>
+    <script>
+      const PIN = document.querySelector("#pin");
+      const SIGNAL = document.querySelector("#signal");
+      const MODE = document.querySelector("#mode");
+      const DIGITAL = document.querySelector("#digital");
+      const ANALOG = document.querySelector("#analog");
+      const SWITCH = document.querySelector("#switch");
+
+      SWITCH.addEventListener("click", function (ev) {
+        console.log("toggle" + this[id]);
+      });
+
+      function clickToggle() {
+        console.log("toggle" + this);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="grid-container">
+      <h1 class="header">Pin Controller</h1>
+      <form action="/api/" method="post" class="form">
+        <div>
+          <label for="pin">Pin Number</label>
+          <input type="number" name="pin" id="pin" />
+        </div>
+        <div>
+          <label for="signal">Signal Type:</label>
+          <select class="select" name="signal" id="signal">
+            <option value="digital">DIGITAL</option>
+            <option value="analog">ANALOG</option>
+          </select>
+        </div>
+        <div>
+          <label for="digital">Digital Value:</label>
+          <select class="select" name="digital" id="digital">
+            <option value="0">LOW</option>
+            <option value="1">HIGH</option>
+          </select>
+        </div>
+        <div>
+          <label for="mode">Signal Type:</label>
+          <select class="select" name="mode" id="mode">
+            <option value="input">INPUT</option>
+            <option value="output">OUTPUT</option>
+          </select>
+        </div>
+        <div>
+          <label for="analog">Analog Value:</label>
+          <input type="number" name="analog" id="analog" />
+        </div>
+        <div>
+          <label for="switch">Toggle</label>
+          <button
+            type="button"
+            id="switch"
+            class="select"
+            value="HIGH"
+            name="button"
+          >
+            HIGH
+          </button>
+        </div>
+      </form>
+      <div class="footer">FOOTER</div>
+    </div>
+  </body>
+</html>

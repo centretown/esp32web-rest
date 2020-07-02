@@ -1,0 +1,102 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Ajax 1 - Text File</title>
+    <!--CSS -->
+    <link rel="stylesheet" href="./css/toggle.css" />
+    <link rel="stylesheet" href="./css/client.css" />
+    <script src="./js/client.js"></script>
+  </head>
+
+  <!--HTML -->
+  <body>
+    <div class="main">
+      <aside class="side">
+        <div>
+          <button id="button" type="button">Submit</button>
+        </div>
+      </aside>
+      <div class="header">Pin Controller</div>
+      <form action="/api/" class="form" id="pinform">
+        <div>
+          <label for="pin">Pin Number:</label>
+          <input type="number" name="pin" id="pin" value="2" />
+        </div>
+        <div>
+          <label for="signal">Signal Type:</label>
+          <select class="select" name="signal" id="signal">
+            <option value="digital">DIGITAL</option>
+            <option value="analog">ANALOG</option>
+          </select>
+        </div>
+        <div>
+          <label for="mode">I/O Mode:</label>
+          <select class="select" name="mode" id="mode">
+            <option value="input">INPUT</option>
+            <option value="output">OUTPUT</option>
+          </select>
+        </div>
+        <div>
+          <label >Digital Value:</label>
+          <div class="toggle" id="digital">
+            <input
+              type="checkbox"
+              name="toggle"
+              class="toggle-checkbox"
+              
+              id="digital-toggle"
+              tabindex="0"
+              checked
+            />
+            <label class="toggle-label" for="digital-toggle">
+              <span class="toggle-inner" on="HIGH" off="LOW"></span>
+              <span class="toggle-switch"></span>
+            </label>
+          </div>
+        </div>
+        <!--
+        <div>
+          <label for="digital">Digital Value:</label>
+          <select class="select" name="digital" id="digital">
+            <option value="0">LOW</option>
+            <option value="1">HIGH</option>
+          </select>
+        </div>
+        -->
+        <div>
+          <label for="analog">Analog Value:</label>
+          <input type="number" name="analog" id="analog" value="0" />
+        </div>
+      </form>
+      <div id="response" class="response">
+        <div>
+          <label for="status">Status:</label>
+          <span id="status"></span>
+        </div>
+        <div>
+          <label for="rpin">Pin Number:</label>
+          <span id="rpin"></span>
+        </div>
+        <div>
+          <label for="rsignal">Signal Type:</label>
+          <span id="rsignal"></span>
+        </div>
+        <div>
+          <label for="rmode">I/O Mode:</label>
+          <span id="rmode"></span>
+        </div>
+        <div>
+          <label for="rdigital">Digital Value:</label>
+          <span id="rdigital"></span>
+        </div>
+        <div>
+          <label for="ranalog">Analog Value:</label>
+          <span id="ranalog"></span>
+        </div>
+      </div>
+      <div id="footer" class="footer">Footer</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+*,
+*:before,
+*:after {
+  /*
+   Include padding and border in the element's total width and height
+   */
+  box-sizing: border-box;
+}
+body {
+  margin: 0.5rem;
+  font-family: "Open Sans", "sans-serif";
+  font-size: smaller;
+  background-color: rgb(31, 85, 82);
+  color: rgb(68, 68, 68);
+  max-height: 100vh;
+}
+.main {
+  height: 100%;
+  width: 100%;
+  min-width: 300px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: 7rem 4fr;
+  grid-template-rows: 2rem 4fr 2fr 2rem;
+  grid-template-areas:
+    "header form"
+    "side form"
+    "side response"
+    "footer response";
+}
+
+.main > * {
+  background-color: rgb(130, 172, 189);
+  color: rgb(119, 15, 15);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  height: 100%;
+}
+
+.form {
+  grid-area: form;
+  display: grid;
+}
+.response,
+.form > * {
+  font-size: 0.7rem;
+}
+.header {
+  grid-area: header;
+}
+.side {
+  grid-area: side;
+}
+.response {
+  grid-area: response;
+}
+
+.response,
+.form {
+  display: grid;
+  align-items: center;
+  justify-items: left;
+}
+.footer {
+  grid-area: footer;
+}
+
+/* We need to set the widths used on floated items back to auto, and remove the bottom margin as when we have grid we have gaps. */
+@supports (display: grid) {
+  .main > * {
+    width: auto;
+    margin: 0;
+  }
+}

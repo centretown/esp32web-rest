@@ -71,9 +71,19 @@
           event.preventDefault();
 
           var actionFile = $("form").attr("action");
-          var formValues = $(this).serialize();
-          console.log(formValues);
-          $.post(actionFile, formValues, function (resp) {
+          // var formValues = $(this).serialize();
+          var req = {
+            pin: $("#pin").val(),
+            signal: $("#signal").val(),
+            mode: $("#mode").val(),
+            digital: $("#digital").val(),
+            analog: $("#analog").val(),
+          };
+
+          reqJson = JSON.stringify(req);
+          console.log(reqJson);
+          // return;
+          $.post(actionFile, reqJson, function (resp) {
             console.log(resp);
             $("#analog").val(resp.analog);
             $("#digital").val(resp.digital);
@@ -102,7 +112,7 @@
         <i class="material-icons">push_pin</i><small> Pin Controller</small>
       </h2>
       <div class="card-body bg-light text-dark" id="request">
-        <form action="/api/">
+        <form action="/api/" method="POST">
           <div class="row">
             <div class="form-group col-sm-3" id="pinG">
               <label for="pin">Pin Number: </label>

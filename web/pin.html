@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      *,
+      *:before,
+      *:after {
+        /* 
+        Include padding and border in 
+        the element's total width and height
+        */
+        box-sizing: border-box;
+      }
+      body {
+        margin: 1rem;
+        font-family: "Open Sans", "sans-serif";
+        background-color: #fff;
+        color: rgb(68, 68, 68);
+        max-height: 100vh;
+      }
+
+      h1,
+      p {
+        margin: 0 0 1em 0;
+      }
+
+      .wrapper {
+        max-width: 940px;
+        margin: 0 20px;
+        display: grid;
+        grid-gap: 10px;
+      }
+
+      @media screen and (min-width: 500px) {
+        /* no grid support? */
+        .sidebar {
+          float: left;
+          width: 19.1489%;
+        }
+
+        .content {
+          float: right;
+          width: 79.7872%;
+        }
+
+        .wrapper {
+          margin: 0 auto;
+          grid-template-columns: 1fr 3fr;
+        }
+
+        .header,
+        .footer {
+          grid-column: 1 / -1;
+          /* needed for the floated laesyout */
+          clear: both;
+        }
+      }
+
+      .wrapper > * {
+        background-color: rgb(189, 189, 216);
+        color: rgb(119, 15, 15);
+        border-radius: 5px;
+        padding: 20px;
+        font-size: 150%;
+        /* needed for the floated layout*/
+        margin-bottom: 10px;
+      }
+
+      /* We need to set the widths used on floated items back to auto, and remove the bottom margin as when we have grid we have gaps. */
+      @supports (display: grid) {
+        .wrapper > * {
+          width: auto;
+          margin: 0;
+        }
+      }
+    </style>
+    <script></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">Arduino Controller</header>
+      <aside class="sidebar">
+        Control
+        <ul>
+          <li>
+            <a id="pins" href="">Pins</a>
+          </li>
+          <li>
+            <a id="blues" href="">Bluetooth</a>
+          </li>
+          <li>
+            <a id="halls" href="">Hall</a>
+          </li>
+        </ul>
+      </aside>
+      <article class="content">
+        <h1>Pin Controller</h1>
+        <p>
+          This example uses line-based positioning, to position the header and
+          footer, stretching them across the grid.
+        </p>
+      </article>
+      <footer class="footer">My footer</footer>
+    </div>
+  </body>
+</html>

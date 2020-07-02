@@ -1,11 +1,10 @@
 /*
-    request.h - a simple http request parser
+    request.h - a simple request parser
 */
 
-#ifndef REQUEST_H
-#define REQUEST_H
-
-#include <Arduino.h>
+#pragma once
+//#include <Arduino.h>
+#include <ArduinoJson.h>
 
 namespace request
 {
@@ -36,6 +35,8 @@ namespace request
         String version;
         String body;
         size_t size = 0;
+        bool isJSON = false;
+        StaticJsonDocument<256> doc;
 
         Request(String &source)
         {
@@ -89,9 +90,19 @@ namespace request
             Serial.print("';'");
 #endif
             // scan the body for parameters
-            if (body.charAt(0) == '{')
+            isJSON = body.charAt(0) == '{';
+
+            if (isJSON)
             {
-                // todo JSON
+                DeserializationError error = deserializeJson(doc, body);
+                // Test if parsing succeeds
+                if (error)
+                {
+                    Serial.print(F("deserializeJson() failed: "));
+                    Serial.println(error.c_str());
+                    Serial.println(body);
+                    return;
+                }
             }
             else
             {
@@ -136,49 +147,4 @@ namespace request
         }
     };
 
-    class PinRequest : public Request
-    {
-    private:
-    public:
-        int pin;
-        String mode;
-        String signal;
-        int digital;
-        int analog;
-
-        PinRequest(String source) : Request(source)
-        {
-            Pair cmd;
-            for (size_t i = 0; i < size; i++)
-            {
-                cmd = commands[i];
-                if (cmd.name == "pin")
-                {
-                    pin = cmd.value.toInt();
-                }
-                else if (cmd.name == "mode")
-                {
-                    mode = cmd.value;
-                }
-                else if (cmd.name == "signal")
-                {
-                    signal = cmd.value;
-                }
-                else if (cmd.name == "digital")
-                {
-                    digital = cmd.value.toInt();
-                }
-                else if (cmd.name == "analog")
-                {
-                    analog = cmd.value.toInt();
-                }
-            }
-        }
-        ~PinRequest()
-        {
-        }
-    };
-
 } // namespace request
-
-#endif // REQUEST_H

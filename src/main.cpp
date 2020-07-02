@@ -13,7 +13,7 @@ Web API:
 // Import required libraries
 #include <Arduino.h>
 #include <WiFi.h>
-#include "Request.h"
+#include "PinRequest.h"
 // must define char *ssid and char *pass)
 #include "credentials.h"
 #include "tabs.h"
@@ -24,7 +24,7 @@ Web API:
 WiFiServer server(80);
 
 void process(WiFiClient client);
-void processApi(WiFiClient client, request::PinRequest req);
+void processApi(WiFiClient client, PinRequest req);
 void ok(WiFiClient client);
 void showPin(WiFiClient client, int pin, String mode, String signal, int digital, int analog);
 void showWebPage(WiFiClient client);
@@ -77,7 +77,7 @@ void process(WiFiClient client)
   String s = client.readString();
   //Serial.println(s);
 
-  request::PinRequest req = request::PinRequest(s);
+  PinRequest req = PinRequest(s);
   //Serial.println(req.path.c_str());
   if (req.path.startsWith("/api/"))
   {
@@ -102,7 +102,8 @@ void process(WiFiClient client)
   return;
 }
 
-void processApi(WiFiClient client, request::PinRequest req)
+// note analog read-only
+void processApi(WiFiClient client, PinRequest req)
 {
   char mode = req.mode.charAt(0);
   char signal = req.signal.charAt(0);
@@ -110,23 +111,16 @@ void processApi(WiFiClient client, request::PinRequest req)
   int analog = req.analog;
   int pin = req.pin;
 
-  if (mode == 'i')
-  {
-    pinMode(pin, INPUT);
-  }
-  else if (mode == 'o')
-  {
-    pinMode(pin, OUTPUT);
-  }
-
   if (signal == 'd')
   {
     if (mode == 'i')
     {
+      pinMode(pin, INPUT);
       digital = digitalRead(pin);
     }
     else if (mode == 'o')
     {
+      pinMode(pin, OUTPUT);
       digitalWrite(pin, digital);
     }
   }
@@ -145,6 +139,9 @@ void ok(WiFiClient client)
   client.println("HTTP/1.1 200 OK");
   // indicate JSON per RFC 4627
   client.println("Content-type:application/json");
+  // allow anyone
+  client.println("Access-Control-Allow-Origin: \"*\"");
+
   client.println();
 }
 
