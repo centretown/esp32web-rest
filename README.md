@@ -4,6 +4,7 @@ This example for the ESP32 WiFi is inspired from the Arduino example [here](http
 Which demonstrates how you can create your own API using REST style.
 # VSCode
 [Installation instructions here.](http://code.visualstudio.com/download)
+
 [Ubuntu command line instructions here.](https://linuxize.com/post/how-to-install-visual-studio-code-on-ubuntu-18-04/)
 # Platformio
 [Installation instructions here.](https://platformio.org/install/ide?install=vscode)
